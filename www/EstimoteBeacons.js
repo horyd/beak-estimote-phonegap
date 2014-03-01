@@ -418,15 +418,14 @@ EstimoteBeacons.prototype.updateFirmwareOfConnectedBeacon = function (progressCa
     }
 };
 
-EstimoteBeacons.prototype.getBeacons = function (successCallback) {
+EstimoteBeacons.prototype.getBeacons = function (successCallback, errorCallback) {
     if (typeof successCallback !== "function") {
         console.error("EstimoteBeacons.getBeacons failure: success callback parameter must be a function");
         return;
     }
 
     exec(successCallback,
-        function () {
-        },
+        errorCallback,
         "EstimoteBeacons",
         "getBeacons",
         []
