@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
-    id="pl.makingwaves.estimotebeacons"
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    id="horyd.beakestimotephonegap"
     version="0.1.0">
-    <name>EstimoteBeacons</name>
-	<description>todo</description>
-	<license>todo</license>
-	<keywords>todo</keywords>
+    <name>BeakEstimoteBeacons</name>
+	<description>Beak's custom implementation of the Phonegap EstimoteBeacons plugin.</description>
+	<license>n/a</license>
+    <author>Jaryd Carolin + kdzwinel</author>
+	<keywords>estimote,phonegap,beak</keywords>
+    <engines>
+        <engine name="cordova" version=">=3.0.0" />
+    </engines>
     <js-module src="www/EstimoteBeacons.js" name="EstimoteBeacons">
         <clobbers target="EstimoteBeacons" />
     </js-module>
