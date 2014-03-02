@@ -14,11 +14,14 @@
 
 - (EstimoteBeacons*)pluginInitialize
 {
+    self.rangingError = NO;
     self.beaconManager = [[ESTBeaconManager alloc] init];
     self.beaconManager.delegate = self;
     self.beaconManager.avoidUnknownStateBeacons = YES;
+    NSMutableArray* output = [NSMutableArray array];
+    self.beacons = output;
     
-    NSUUID *IPAD_UUID = [[NSUUID alloc] initWithUUIDString:@"8492E75F-4FD6-469D-B132-043FE94921D8"];
+    //NSUUID *IPAD_UUID = [[NSUUID alloc] initWithUUIDString:@"8492E75F-4FD6-469D-B132-043FE94921D8"];
     NSUUID *ESTIMOTE_UUID = [[NSUUID alloc] initWithUUIDString:@"B9407F30-F5F8-466E-AFF9-25556B57FE6D"];
     //8492E75F-4FD6-469D-B132-043FE94921D8 iPad
     //major:12768
@@ -30,15 +33,6 @@
     
     self.regionWatchers = [[NSMutableDictionary alloc] init];
     
-    //    for (CLRegion *region in self.beaconManager.monitoredRegions) {
-    //        [self.beaconManager stopMonitoringForRegion:region];
-    //    }
-    [self.beaconManager stopMonitoringForRegion:[[ESTBeaconRegion alloc] initWithProximityUUID:IPAD_UUID identifier:@"EstimoteSampleRegion"]];
-    [self.beaconManager stopMonitoringForRegion:[[ESTBeaconRegion alloc] initWithProximityUUID:IPAD_UUID
-                                                                                         major:12768
-                                                                                    identifier:@"EstimoteSampleRegion"]];
-    //    [self.beaconManager stopRangingBeaconsInRegion:self.currentRegion];
-    //    [self.beaconManager startRangingBeaconsInRegion:self.currentRegion];
     [self.beaconManager stopMonitoringForRegion:self.currentRegion];
     [self.beaconManager startMonitoringForRegion:self.currentRegion];
     [self.beaconManager stopRangingBeaconsInRegion:self.currentRegion];
@@ -62,7 +56,7 @@
      didRangeBeacons:(NSArray *)beacons
             inRegion:(ESTBeaconRegion *)region
 {
-    self.ranging = YES;
+    self.rangingError = NO;
     NSMutableArray* output = [NSMutableArray array];
     //    HTTP request for presence creation?
     if([beacons count] > 0)
@@ -78,7 +72,7 @@
 rangingBeaconsDidFailForRegion:(ESTBeaconRegion *)region
            withError:(NSError *)error
 {
-    self.ranging = NO;
+    self.rangingError = YES;
     NSLog(@"Ranging Beacons failed for %@", region);
     
 }
@@ -121,10 +115,10 @@ monitoringDidFailForRegion:(ESTBeaconRegion *)region
 {
     [self.commandDelegate runInBackground:^{
         CDVPluginResult* pluginResult = nil;
-        if (self.ranging == YES) {
+        if (self.rangingError == NO) {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:self.beacons];
         }
-        if (self.ranging == NO) {
+        if (self.rangingError == YES) {
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"BeaconManager failed to commence ranging."];
         }
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

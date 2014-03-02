@@ -9,6 +9,6 @@
 @property NSString* firmwareUpdateProgress;
 @property ESTBeacon* connectedBeacon;
 @property NSMutableDictionary* regionWatchers;
-@property (nonatomic) BOOL ranging;
+@property (nonatomic) BOOL rangingError;
 - (EstimoteBeacons*)pluginInitialize;
 @end
