@@ -2,7 +2,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     id="horyd.beakestimotephonegap"
     version="0.1.0">
-    <name>BeakEstimoteBeacons</name>
+    <name>EstimoteBeacons</name>
 	<description>Beak's custom implementation of the Phonegap EstimoteBeacons plugin.</description>
 	<license>n/a</license>
     <author>Jaryd Carolin + kdzwinel</author>
