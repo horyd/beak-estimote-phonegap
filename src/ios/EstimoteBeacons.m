@@ -21,12 +21,7 @@
     NSMutableArray* output = [NSMutableArray array];
     self.beacons = output;
     
-    //NSUUID *IPAD_UUID = [[NSUUID alloc] initWithUUIDString:@"8492E75F-4FD6-469D-B132-043FE94921D8"];
     NSUUID *ESTIMOTE_UUID = [[NSUUID alloc] initWithUUIDString:@"B9407F30-F5F8-466E-AFF9-25556B57FE6D"];
-    //8492E75F-4FD6-469D-B132-043FE94921D8 iPad
-    //major:12768
-    //B9407F30-F5F8-466E-AFF9-25556B57FE6D Estimotes
-    //major:50485
     self.currentRegion = [[ESTBeaconRegion alloc] initWithProximityUUID:ESTIMOTE_UUID
                                                                   major:50485
                                                              identifier:@"EstimoteSampleRegion"];
@@ -58,7 +53,6 @@
 {
     self.rangingError = NO;
     NSMutableArray* output = [NSMutableArray array];
-    //    HTTP request for presence creation?
     if([beacons count] > 0)
     {
         for (id beacon in beacons) {
@@ -73,43 +67,7 @@ rangingBeaconsDidFailForRegion:(ESTBeaconRegion *)region
            withError:(NSError *)error
 {
     self.rangingError = YES;
-    NSLog(@"Ranging Beacons failed for %@", region);
-    
 }
-
--(void)beaconManager:(ESTBeaconManager *)manager
-monitoringDidFailForRegion:(ESTBeaconRegion *)region
-           withError:(NSError *)error;
-{
-    NSLog(@"Monitoring failed for %@", region);
-    
-}
-
--(void)beaconManager:(ESTBeaconManager *)manager
-      didEnterRegion:(ESTBeaconRegion *)region
-{
-    
-    NSLog(@"ENTER REGION: %@", region);
-    
-    UILocalNotification *notification = [[UILocalNotification alloc] init];
-    notification.alertBody = @"You have just received a $1 coffee special at Parma!";
-    notification.soundName = UILocalNotificationDefaultSoundName;
-    [[UIApplication sharedApplication] presentLocalNotificationNow:notification];
-    
-}
-
--(void)beaconManager:(ESTBeaconManager *)manager
-       didExitRegion:(ESTBeaconRegion *)region
-{
-    
-    NSLog(@"EXIT REGION: %@", region);
-    
-    UILocalNotification *notification = [[UILocalNotification alloc] init];
-    notification.alertBody = @"Sorry to see you leave.";
-    notification.soundName = UILocalNotificationDefaultSoundName;
-    [[UIApplication sharedApplication] presentLocalNotificationNow:notification];
-}
-
 
 - (void)getBeacons:(CDVInvokedUrlCommand*)command
 {
@@ -119,7 +77,19 @@ monitoringDidFailForRegion:(ESTBeaconRegion *)region
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:self.beacons];
         }
         if (self.rangingError == YES) {
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"BeaconManager failed to commence ranging."];
+            NSLog(@"Ranging error discovered in getBeacons request... attempting to reboot monitoring and ranging services...");
+            [self.beaconManager stopMonitoringForRegion:self.currentRegion];
+            [self.beaconManager startMonitoringForRegion:self.currentRegion];
+            [self.beaconManager stopRangingBeaconsInRegion:self.currentRegion];
+            [self.beaconManager startRangingBeaconsInRegion:self.currentRegion];
+            if (self.rangingError == NO) {
+                NSLog(@"Ranging has successfully commenced from an earlier error");
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:self.beacons];
+            }
+            if (self.rangingError == YES) {
+                NSLog(@"The earlier ranging error persists...");
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"BeaconManager failed to commence ranging."];
+            }
         }
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }];
