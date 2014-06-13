@@ -35,12 +35,19 @@
 	
 	<!-- android -->
 	<platform name="android">     
-		<source-file src="src/android/EstimoteBeacons.java" target-dir="src/horyd/beakestimotephonegap" />
+		<source-file src="src/android/EstimoteBeacons.java" target-dir="src/horyd/beakestimotephonegap/EstimoteBeacons" />
 		<source-file src="libs/estimote-sdk-preview.jar" target-dir="libs" />
 		
 		<config-file target="AndroidManifest.xml" parent="/manifest">
 			<uses-permission android:name="android.permission.BLUETOOTH" />
 			<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+			<uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+			
+			<feature name="EstimoteBeacons">
+				<param name="android-package" value="EstimoteBeacons" />
+				<param name="onload" value="true" />
+			</feature>
+			
 		</config-file>
 		
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
