@@ -1,4 +1,4 @@
-package horyd.beakestimotephonegap.EstimoteBeacons;
+package horyd.beakestimotephonegap;
 
 //import com.estimote.sdk.Beacon;
 //import com.estimote.sdk.BeaconManager;
@@ -8,9 +8,9 @@ import org.apache.cordova.*;
 import org.json.JSONArray;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
@@ -24,16 +24,15 @@ public class EstimoteBeacons extends CordovaPlugin {
 
 		Log.d(LOG_TAG, "Initializing...");
 		
-		Context ctx = cordova.getActivity().getApplicationContext();
+		Activity activity = cordova.getActivity();
+		Context ctx = activity.getApplicationContext();
 		
 		// Use this check to determine whether BLE is supported on the device. Then
 		// you can selectively disable BLE-related features.
 		if (!ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-			Toast.makeText(ctx, "BLE is NOT supported on your device", Toast.LENGTH_SHORT).show();			
 			Log.d(LOG_TAG, "BLE is NOT supported on this device");
 		}
 		else {
-			Toast.makeText(ctx, "BLE is supported on your device", Toast.LENGTH_SHORT).show();			
 			Log.d(LOG_TAG, "BLE is supported on this device");
 		}
 	}
