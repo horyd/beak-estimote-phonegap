@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.cordova.*;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
@@ -116,57 +117,38 @@ public class EstimoteBeacons extends CordovaPlugin {
 
 		Log.d(TAG, "Receive action to execute: " + action);
 
-		switch (action) {
-		case "startMonitoringForRegion":
-		case "startEstimoteBeaconsDiscoveryForRegion":
+		if (action.equals("startRangingBeaconsInRegion")) {
 			this.startRanging(callbackContext);
-			break;
-		case "stopRangingBeaconsInRegion":
-		case "stopEstimoteBeaconsDiscoveryForRegion":
+		}
+		else if (action.equals("stopRangingBeaconsInRegion")) {
 			this.stopRanging(callbackContext);
-			break;
-		case "getBeacons":
+		}
+		else if (action.equals("getBeacons")) {
 			this.getBeacons(callbackContext);
-			break;
-		default:
+		}
+		else {
 			callbackContext.error("This action does not exist.");
 			return false;
 		}
 
-		/*
-		 * if (action.equals("startMonitoringForRegion")) { // TODO } else if
-		 * (action.equals("stopRangingBeaconsInRegion")) { // TODO } else if
-		 * (action.equals("getBeaconByIdx")) { // TODO } else if
-		 * (action.equals("getClosestBeacon")) { // TODO } else if
-		 * (action.equals("getConnectedBeacon")) { // TODO } else if
-		 * (action.equals("connectToBeacon")) { // TODO } else if
-		 * (action.equals("connectToBeaconByMacAddress")) { // TODO } else if
-		 * (action.equals("disconnectFromBeacon")) { // TODO } else if
-		 * (action.equals("setAdvIntervalOfConnectedBeacon")) { // TODO } else
-		 * if (action.equals("setPowerOfConnectedBeacon")) { // TODO } else if
-		 * (action.equals("getBeacons")) { // TODO } else if
-		 * (action.equals("startVirtualBeacon")) { // TODO } else if
-		 * (action.equals("stopVirtualBeacon")) { // TODO } else { Log.e(TAG,
-		 * "Could not find this action: " + action); return false; }
-		 */
 		return true;
 	}
 
+	// Cordova callbacks
 	private void startRanging(CallbackContext callbackContext) {
 		Log.d(TAG, "Start Ranging...");
 
 		final EstimoteBeacons that = this;
-		// initialize list to an empty list !
+		
+		// initialize list to an empty list
 		this.beacons = new ArrayList<Beacon>();
 		
-		this.connectToService();
+		this.connectToServiceThenStartRanging();
 
 		beaconManager.setRangingListener(new BeaconManager.RangingListener() {
 			@Override
 			public void onBeaconsDiscovered(Region region, final List<Beacon> beacons) {
-				Log.d(TAG, "Found " + beacons.size() + " Beacons !!! ");
-				that.sendJavascript("console.log('Found " + beacons.size() + " Beacons !!! ');");
-				// beacons.get(0).getMacAddress() + " Beacons !!! ');");
+				Log.d(TAG, "Found " + beacons.size() + " beacons!");
 				that.beacons = beacons;
 			}
 		});
@@ -189,7 +171,18 @@ public class EstimoteBeacons extends CordovaPlugin {
 		}
 	}
 
-	private void connectToService() {
+	private void getBeacons(CallbackContext callbackContext) {
+
+		if (this.beacons != null) {
+			JSONArray beacons = EstimoteBeacons.convertList2JSONArray(this.beacons);
+			callbackContext.success(beacons);
+		} else {
+			callbackContext.error("Could not getBecons.");
+		}
+	}
+
+	// NON Cordova callbacks (internal methods)
+	private void connectToServiceThenStartRanging() {
 		Log.d(TAG, "Scanning...");
 		
 		beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
@@ -209,19 +202,23 @@ public class EstimoteBeacons extends CordovaPlugin {
 		JSONArray jsonArray = new JSONArray();
 
 		for (int i = 0; i < list.size(); i++) {
-			jsonArray.put(list.get(i));
+			Beacon beacon = list.get(i);
+			
+			JSONObject beaconInfos = new JSONObject();
+			try {
+				beaconInfos.put("major", beacon.getMajor());
+				beaconInfos.put("minor", beacon.getMinor());
+				beaconInfos.put("power", beacon.getMeasuredPower());
+				beaconInfos.put("rssi", beacon.getRssi());
+				beaconInfos.put("macAddress", beacon.getMacAddress());
+				beaconInfos.put("name", beacon.getName());
+				beaconInfos.put("uuid", beacon.getProximityUUID());
+				jsonArray.put(beaconInfos);
+			} catch (JSONException e) {
+			}
+			
 		}
 		return jsonArray;
-	}
-
-	private void getBeacons(CallbackContext callbackContext) {
-
-		if (this.beacons != null) {
-			JSONArray beacons = EstimoteBeacons.convertList2JSONArray(this.beacons);
-			callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, beacons));
-		} else {
-			callbackContext.error("Could not getBecons.");
-		}
 	}
 
 }
