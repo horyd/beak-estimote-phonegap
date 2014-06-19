@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-    id="horyd.beakestimotephonegap"
-    version="0.1.1">
-    <name>EstimoteBeacons</name>
+		id="horyd.beakestimotephonegap"
+		version="0.1.1">
+	<name>EstimoteBeacons</name>
 	<description>Beak's custom implementation of the Phonegap EstimoteBeacons plugin.</description>
 	<license>n/a</license>
-    <author>Jaryd Carolin + kdzwinel</author>
+	<author>Jaryd Carolin + kdzwinel</author>
 	<keywords>estimote,phonegap,beak</keywords>
-    <engines>
-        <engine name="cordova" version=">=3.0.0" />
-    </engines>
-    <js-module src="www/EstimoteBeacons.js" name="EstimoteBeacons">
-        <clobbers target="EstimoteBeacons" />
-    </js-module>
-    <!-- ios -->
-    <platform name="ios">     
+	<engines>
+		<engine name="cordova" version=">=3.0.0" />
+	</engines>
+	<js-module src="www/EstimoteBeacons.js" name="EstimoteBeacons">
+		<clobbers target="EstimoteBeacons" />
+	</js-module>
+	<!-- ios -->
+	<platform name="ios">     
 		<framework src="CoreBluetooth.framework" />
 		<framework src="CoreLocation.framework" />
 		<framework src="SystemConfiguration.framework" />
@@ -23,13 +23,38 @@
 		<header-file src="src/ios/ESTBeaconManager.h" />
 		<header-file src="src/ios/ESTBeaconRegion.h" />
 		<header-file src="src/ios/ESTBeaconUpdateInfo.h" />
-        <header-file src="src/ios/EstimoteBeacons.h" />
-        <source-file src="src/ios/EstimoteBeacons.m" />
-    	<config-file target="config.xml" parent="/*">
-            <feature name="EstimoteBeacons">
-                <param name="ios-package" value="EstimoteBeacons" />
-                <param name="onload" value="true" />
-            </feature>
-        </config-file>
+		<header-file src="src/ios/EstimoteBeacons.h" />
+		<source-file src="src/ios/EstimoteBeacons.m" />
+		<config-file target="config.xml" parent="/*">
+			<feature name="EstimoteBeacons">
+				<param name="ios-package" value="EstimoteBeacons" />
+				<param name="onload" value="true" />
+			</feature>
+		</config-file>
 	</platform>
+	
+	<!-- android -->
+	<platform name="android">
+		<source-file src="src/android/EstimoteBeacons.java" target-dir="src/horyd/beakestimotephonegap" />
+		<source-file src="libs/estimote-sdk-preview.jar" target-dir="libs" />
+		
+		<config-file target="res/xml/config.xml" parent="/*">
+			<feature name="EstimoteBeacons">
+				<param name="android-package" value="horyd.beakestimotephonegap.EstimoteBeacons" />
+				<param name="onload" value="true" />
+			</feature>
+		</config-file>
+		
+		<config-file target="AndroidManifest.xml" parent="/manifest">
+			<uses-permission android:name="android.permission.BLUETOOTH" />
+			<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+			<uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+		</config-file>
+		
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+			<service android:name="com.estimote.sdk.service.BeaconService" android:exported="false" />
+		</config-file>
+		
+	</platform>
+	
 </plugin>
